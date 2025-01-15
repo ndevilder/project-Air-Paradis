@@ -6,7 +6,7 @@ app = FastAPI()
 # Endpoint racine
 @app.get("/")
 def read_root():
-    return {"message": "Bienvenue dans votre application FastAPI !"}
+    return {"message": "Bienvenue dans l'application FastAPI !"}
 
 # Endpoint pour récupérer un message personnalisé
 @app.get("/hello/{name}")
