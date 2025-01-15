@@ -11,7 +11,7 @@ def read_root():
 # Endpoint pour récupérer un message personnalisé
 @app.get("/hello/{name}")
 def say_hello(name: str):
-    return {"message": f"Bonjour, {name} !"}
+    return {"message": f"Bonjour bonjour, {name} !"}
 
 # Endpoint pour additionner deux nombres
 @app.post("/add/")
