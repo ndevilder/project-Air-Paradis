@@ -21,13 +21,10 @@ jobs:
         echo "$EC2_KEY" > ec2-key.pem
         chmod 600 ec2-key.pem
 
-    - name: Verify environment variables
-      env:
-        EC2_USER: ${{ secrets.EC2_USER }}
-        EC2_HOST: ${{ secrets.EC2_HOST }}
+    - name: Add EC2 to known_hosts
       run: |
-        echo "EC2_USER is set to: $EC2_USER"
-        echo "EC2_HOST is set to: $EC2_HOST"
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
     - name: Create App Directory on EC2
       run: |
