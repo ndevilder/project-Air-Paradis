@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Étape 1 : Cloner le code source
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Étape 2 : Configurer la connexion SSH
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
+
+    - name: Add EC2 to known_hosts
+      run: |
+        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
     - name: Deploy to EC2
       env:
@@ -26,12 +28,6 @@ jobs:
       run: |
         echo "$EC2_KEY" > ec2-key.pem
         chmod 600 ec2-key.pem
-        scp -i ec2-key.pem -r ./* $EC2_USER@$EC2_HOST:/home/ec2-user/app
+        scp -i ec2-key.pem -r ./* $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
         ssh -i ec2-key.pem $EC2_USER@$EC2_HOST << 'EOF'
           sudo docker stop fastapi-app || true
-          sudo docker rm fastapi-app || true
-          cd /home/ec2-user/app
-          sudo docker build -t fastapi-app .
-          sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
-        EOF
-
