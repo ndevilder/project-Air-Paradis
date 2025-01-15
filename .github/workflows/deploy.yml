@@ -16,6 +16,12 @@ jobs:
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
+    - name: Create SSH directory
+      run: |
+        mkdir -p ~/.ssh
+        touch ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/known_hosts
+
     - name: Add EC2 to known_hosts
       run: |
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
@@ -31,3 +37,8 @@ jobs:
         scp -i ec2-key.pem -r ./* $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
         ssh -i ec2-key.pem $EC2_USER@$EC2_HOST << 'EOF'
           sudo docker stop fastapi-app || true
+          sudo docker rm fastapi-app || true
+          cd /home/$EC2_USER/app
+          sudo docker build -t fastapi-app .
+          sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
+        EOF
