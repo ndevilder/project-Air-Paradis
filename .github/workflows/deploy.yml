@@ -19,7 +19,8 @@ jobs:
     - name: Print EC2_HOST
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
-      run: echo "EC2_HOST is set to: $EC2_HOST"
+      run: |
+       echo "EC2_HOST is set to: $EC2_HOST"
 
     - name: Create SSH directory
       run: |
