@@ -21,20 +21,28 @@ jobs:
         echo "$EC2_KEY" > ec2-key.pem
         chmod 600 ec2-key.pem
 
+    - name: Verify environment variables
+      env:
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        echo "EC2_USER is set to: $EC2_USER"
+        echo "EC2_HOST is set to: $EC2_HOST"
+
     - name: Create App Directory on EC2
       run: |
-        ssh -i ec2-key.pem $EC2_USER@$EC2_HOST "mkdir -p /home/$EC2_USER/app"
+        ssh -i ec2-key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/app"
 
     - name: Transfer Files to EC2
       run: |
-        scp -i ec2-key.pem -r ./* $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
+        scp -i ec2-key.pem -r ./* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app
 
     - name: Deploy Application on EC2
       run: |
-        ssh -i ec2-key.pem $EC2_USER@$EC2_HOST << 'EOF'
+        ssh -i ec2-key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
-          cd /home/$EC2_USER/app || exit 1
+          cd /home/${{ secrets.EC2_USER }}/app || exit 1
           sudo docker build -t fastapi-app .
           sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
         EOF
