@@ -16,24 +16,20 @@ jobs:
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
+    - name: Print EC2_HOST
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+      run: echo "EC2_HOST is set to: $EC2_HOST"
+
     - name: Create SSH directory
       run: |
         mkdir -p ~/.ssh
         touch ~/.ssh/known_hosts
         chmod 600 ~/.ssh/known_hosts
-        
-    - name: Print EC2_HOST
-          run: echo $EC2_HOST
-          env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          
+
     - name: Add EC2 to known_hosts
       run: |
-        if [ -z "$EC2_HOST" ]; then
-          echo "Error: EC2_HOST is not set or empty."
-          exit 1
-        fi
-        ssh-keyscan -p 22 -H $EC2_HOST >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
     - name: Deploy to EC2
       env:
