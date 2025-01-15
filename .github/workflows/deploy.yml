@@ -16,6 +16,11 @@ jobs:
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
+    - name: Create SSH key file
+      run: |
+        echo "$EC2_KEY" > ec2-key.pem
+        chmod 600 ec2-key.pem
+
     - name: Create App Directory on EC2
       run: |
         ssh -i ec2-key.pem $EC2_USER@$EC2_HOST "mkdir -p /home/$EC2_USER/app"
@@ -29,7 +34,7 @@ jobs:
         ssh -i ec2-key.pem $EC2_USER@$EC2_HOST << 'EOF'
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
-          cd /home/ec2-user/app || exit 1
+          cd /home/$EC2_USER/app || exit 1
           sudo docker build -t fastapi-app .
           sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
         EOF
