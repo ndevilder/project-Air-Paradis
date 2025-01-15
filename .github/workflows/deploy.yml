@@ -16,9 +16,6 @@ jobs:
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
-    - name: Verify EC2_HOST
-      run: echo "EC2_HOST is set to: $EC2_HOST"
-
     - name: Create SSH directory
       run: |
         mkdir -p ~/.ssh
