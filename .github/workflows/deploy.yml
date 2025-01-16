@@ -21,13 +21,22 @@ jobs:
 
     - name: Create SSH key file
       run: |
-        echo "$EC2_KEY" > ndevilder-airParadis.pem
+        echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
         chmod 600 ndevilder-airParadis.pem
+
+    - name: Validate SSH Key File
+      run: |
+        ls -l ndevilder-airParadis.pem
+        file ndevilder-airParadis.pem
 
     - name: Add EC2 to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Test SSH Connection
+      run: |
+        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
 
     - name: Create App Directory on EC2
       run: |
