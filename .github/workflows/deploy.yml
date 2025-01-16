@@ -16,6 +16,9 @@ jobs:
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
+    - name: Debug EC2_KEY
+      run: echo "${{ secrets.EC2_KEY }}" | head -c 10
+
     - name: Create SSH key file
       run: |
         echo "$EC2_KEY" > ndevilder-airParadis.pem
