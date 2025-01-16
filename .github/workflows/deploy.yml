@@ -18,7 +18,7 @@ jobs:
 
     - name: Create SSH key file
       run: |
-        echo "$EC2_KEY" > ec2-key.pem
+        echo "$EC2_KEY" > ndevilder-airParadis.pem
         chmod 600 ec2-key.pem
 
     - name: Add EC2 to known_hosts
