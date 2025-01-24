@@ -3,5 +3,6 @@ uvicorn
 transformers
 torch
 boto3
+pyyaml
 PyYAML
 python-multipart

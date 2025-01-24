@@ -1,21 +1,23 @@
-# Utiliser une image Python légère
+# Utilisez une image Python légère
 FROM python:3.9-slim
 
-# Installer pip et les dépendances système nécessaires
+# Installer les outils nécessaires
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances Python
+# Copier le fichier requirements.txt dans l'image
 COPY requirements.txt /app/
+
+# Installer les dépendances Python
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copier les fichiers de l'application dans le conteneur
+# Copier le code source de l'application
 COPY . /app
 WORKDIR /app
 
-# Exposer le port
+# Exposer le port 80
 EXPOSE 80
 
 # Commande pour démarrer l'application
