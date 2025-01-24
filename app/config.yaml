@@ -1,0 +1,5 @@
+use_aws: true # Set to true if you want to use AWS false for local tests
+negative_feedback_limit: 5
+negative_feedback_window_minutes: 5
+model_dir: saved_models/final_distilbert_model
+model_parts_dir: saved_models/final_distilbert_model_parts

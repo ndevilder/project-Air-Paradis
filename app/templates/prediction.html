@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Prediction Result</h1>
+        <p><strong>Text:</strong> {{ text }}</p>
+        <p class="prediction"><strong>Prediction:</strong> {{ prediction }}</p>
+        <form action="/feedback" method="post">
+            <input type="hidden" name="correct" value="1">
+            <button type="submit" class ="correct">Correct</button>
+        </form>
+        <form action="/feedback" method="post">
+            <input type="hidden" name="correct" value="0">
+            <button type="submit" class="incorrect">Incorrect</button>
+        </form>
+    </div>
+</body>
+</html>
