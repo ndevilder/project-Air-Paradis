@@ -1,4 +1,7 @@
 fastapi
 uvicorn
-numpy
-scikit-learn
+transformers
+torch
+boto3
+PyYAML
+python-multipart
