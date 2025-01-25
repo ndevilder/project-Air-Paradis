@@ -45,22 +45,13 @@ jobs:
     - name: Transfer Files to EC2
       run: |
         scp -i ndevilder-airParadis.pem -r ./* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app
-        
+
     - name: Deploy Application on EC2
       run: |
         ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          sudo yum update -y
-          sudo yum install -y python3 git
-          pip3 install --upgrade pip
-      
-          # Navigate to the application directory
+          sudo docker stop fastapi-app || true
+          sudo docker rm fastapi-app || true
           cd /home/${{ secrets.EC2_USER }}/app || exit 1
-      
-          # Install Python dependencies
-          pip3 install -r requirements.txt
-      
-          # Launch the application with Uvicorn
-          pkill uvicorn || true
-          nohup uvicorn main:app --host 0.0.0.0 --port 80 > app.log 2>&1 &
-          EOF
-      
+          sudo docker build -t fastapi-app .
+          sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
+        EOF
