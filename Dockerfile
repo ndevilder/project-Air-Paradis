@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copier le code source de l'application
 COPY . /app
-WORKDIR /app
+WORKDIR /app/app
 
 # Exposer le port 80
 EXPOSE 80
