@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from app.main import app
+from app.main import predict_text, handle_negative_feedback, negative_feedback_times
 
 client = TestClient(app)
 

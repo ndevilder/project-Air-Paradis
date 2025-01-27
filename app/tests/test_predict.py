@@ -1,4 +1,4 @@
-from main import predict_text
+from app.main import predict_text, handle_negative_feedback, negative_feedback_times
 
 def test_predict_text_positive():
     text = "This is a great product!"

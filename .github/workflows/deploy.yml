@@ -38,7 +38,7 @@ jobs:
         echo "negative_feedback_limit: 10" > config.yaml
         echo "negative_feedback_window_minutes: 5" >> config.yaml
         echo "use_aws: false" >> config.yaml
-        echo "model_dir: ./models" >> config.yaml
+        echo "model_dir: distilbert-base-uncased" >> config.yaml
         echo "cloudwatch_metric_name: NegativeFeedbackCount" >> config.yaml
         echo "cloudwatch_namespace: MyApp/Feedback" >> config.yaml
 
