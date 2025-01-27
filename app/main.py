@@ -130,8 +130,8 @@ async def predict(request: Request, text: str = Form(...)):
     Effectue une prédiction sur le texte soumis par l'utilisateur.
     """
     try:
-        # Vérifier si le texte est vide
-        if not text.strip():
+        # Vérifier si le texte est vide ou composé uniquement d'espaces
+        if not text or not text.strip():
             return templates.TemplateResponse(
                 "error.html",
                 {
@@ -140,6 +140,7 @@ async def predict(request: Request, text: str = Form(...)):
                 },
             )
         
+        # Effectuer la prédiction
         prediction, probabilities = predict_text(text)
         return templates.TemplateResponse(
             "prediction.html",
@@ -152,6 +153,7 @@ async def predict(request: Request, text: str = Form(...)):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {e}")
+
 
 
 # Route pour gérer les feedbacks utilisateurs
