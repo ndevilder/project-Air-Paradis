@@ -1,5 +1,6 @@
-use_aws: true # Set to true if you want to use AWS false for local tests
+use_aws: true
+aws_region: "eu-north-1"
+cloudwatch_namespace: "MyApp/Feedback"
+cloudwatch_metric_name: "NegativeFeedbackCount"
 negative_feedback_limit: 5
-negative_feedback_window_minutes: 5
-model_dir: saved_models/final_distilbert_model
-model_parts_dir: saved_models/final_distilbert_model_parts
+negative_feedback_window_minutes: 15

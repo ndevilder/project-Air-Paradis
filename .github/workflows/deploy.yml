@@ -26,6 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov
+        pip install httpx
 
     # Étape 4 : Ajouter PYTHONPATH pour trouver les modules
     - name: Set PYTHONPATH

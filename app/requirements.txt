@@ -7,4 +7,3 @@ pyyaml
 PyYAML
 python-multipart
 pytest
-httpx
