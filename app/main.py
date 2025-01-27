@@ -55,10 +55,12 @@ def publish_to_cloudwatch(metric_name, value, namespace):
                 }
             ],
         )
-        print(f"Métrique {metric_name} publiée avec succès dans {config.get('aws_region', 'eu-north-1')} : {value}")
+        print(f"Métrique {metric_name} publiée avec succès : {value}")
+        print(f"Réponse CloudWatch : {response}")
         return response
     except Exception as e:
         print(f"Erreur lors de l'envoi de la métrique à CloudWatch : {e}")
+
 
 # Fonction pour gérer les feedbacks négatifs
 def handle_negative_feedback():
@@ -126,6 +128,16 @@ async def predict(request: Request, text: str = Form(...)):
     Effectue une prédiction sur le texte soumis par l'utilisateur.
     """
     try:
+        # Vérifier si le texte est vide
+        if not text.strip():
+            return templates.TemplateResponse(
+                "error.html",
+                {
+                    "request": request,
+                    "error_message": "Le texte soumis est vide. Veuillez saisir un texte valide.",
+                },
+            )
+        
         prediction, probabilities = predict_text(text)
         return templates.TemplateResponse(
             "prediction.html",
@@ -138,6 +150,7 @@ async def predict(request: Request, text: str = Form(...)):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {e}")
+
 
 # Route pour gérer les feedbacks utilisateurs
 @app.post("/feedback", response_class=HTMLResponse)

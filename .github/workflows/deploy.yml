@@ -6,46 +6,63 @@ on:
       - main
 
 jobs:
-  deploy:
+  test-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # Étape 1 : Récupération du code
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # Étape 2 : Installer Python et dépendances
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Étape 3 : Exécuter les tests unitaires avec Pytest
+    - name: Run tests
+      run: |
+        pytest --cov=. --cov-report=xml
+      continue-on-error: false  # Stoppe le déploiement si les tests échouent
+
+    # Étape 4 : Installer le client SSH
     - name: Install SSH Client
       run: sudo apt-get install -y openssh-client
 
-    - name: Debug EC2_KEY
-      run: echo "${{ secrets.EC2_KEY }}" | head -c 10
-
+    # Étape 5 : Créer le fichier de clé SSH
     - name: Create SSH key file
       run: |
         echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
         chmod 600 ndevilder-airParadis.pem
 
-    - name: Validate SSH Key File
-      run: |
-        ls -l ndevilder-airParadis.pem
-        file ndevilder-airParadis.pem
-
+    # Étape 6 : Ajouter EC2 à known_hosts
     - name: Add EC2 to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
+    # Étape 7 : Vérifier la connexion SSH
     - name: Test SSH Connection
       run: |
         ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
 
+    # Étape 8 : Créer le répertoire de l'application sur EC2
     - name: Create App Directory on EC2
       run: |
         ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/app"
 
+    # Étape 9 : Transférer les fichiers vers EC2
     - name: Transfer Files to EC2
       run: |
         scp -i ndevilder-airParadis.pem -r ./* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app
 
+    # Étape 10 : Déployer l'application sur EC2
     - name: Deploy Application on EC2
       run: |
         ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
@@ -53,5 +70,5 @@ jobs:
           sudo docker rm fastapi-app || true
           cd /home/${{ secrets.EC2_USER }}/app || exit 1
           sudo docker build -t fastapi-app .
-          sudo docker run -d -p 80:8000 --name fastapi-app fastapi-app
+          sudo docker run -d --name fastapi-app -p 80:80 fastapi-app
         EOF
