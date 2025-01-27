@@ -8,6 +8,7 @@
     <div class="container">
         <h1>Prediction Result</h1>
         <p><strong>Text:</strong> {{ text }}</p>
+        <p><strong>Text length:</strong> {{ length }}</p>
         <p class="prediction"><strong>Prediction:</strong> {{ prediction }}</p>
         <form action="/feedback" method="post">
             <input type="hidden" name="correct" value="1">
