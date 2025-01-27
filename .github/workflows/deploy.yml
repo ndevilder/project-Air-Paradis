@@ -27,11 +27,13 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov
 
-    # Étape 3 : Exécuter les tests unitaires avec Pytest
-    - name: Run tests
-      run: |
-        pytest --cov=. --cov-report=xml
-      continue-on-error: false  # Stoppe le déploiement si les tests échouent
+    # Étape 4 : Ajouter PYTHONPATH pour trouver les modules
+    - name: Set PYTHONPATH
+      run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
+    # Étape 5 : Exécuter les tests avec couverture
+    - name: Run Pytest
+      run: pytest --cov=. --cov-report=xml
 
     # Étape 4 : Installer le client SSH
     - name: Install SSH Client
