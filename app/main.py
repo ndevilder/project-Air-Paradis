@@ -30,6 +30,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 base_dir = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
+# Initialize tokenizer and model
+tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased")
+
 # Global parameters for negative feedback
 NEGATIVE_FEEDBACK_LIMIT = config["negative_feedback_limit"]
 NEGATIVE_FEEDBACK_WINDOW = timedelta(minutes=config["negative_feedback_window_minutes"])
