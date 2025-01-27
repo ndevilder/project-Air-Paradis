@@ -42,6 +42,10 @@ jobs:
         echo "cloudwatch_metric_name: NegativeFeedbackCount" >> config.yaml
         echo "cloudwatch_namespace: MyApp/Feedback" >> config.yaml
 
+    - name: Create static directory for tests
+      run: mkdir -p static
+
+
     # Étape 6 : Vérifier les packages installés
     - name: Check installed packages
       run: pip list
