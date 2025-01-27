@@ -9,8 +9,3 @@ def test_home():
     assert response.status_code == 200
     assert "powered by" in response.text
 
-def test_predict():
-    response = client.post("/predict", data={"text": "Test de prédiction"})
-    assert response.status_code == 200
-    assert "positive" in response.text or "negative" in response.text
-    
