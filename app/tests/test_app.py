@@ -1,14 +1,19 @@
 from fastapi.testclient import TestClient
-from app.main import handle_negative_feedback, negative_feedback_times
+from app.main import app
+
 client = TestClient(app)
 
-def test_predict():
-    response = client.post("/predict", data={"text": "This is a test text."})
+def test_home():
+    response = client.get("/")
     assert response.status_code == 200
-    assert "prediction" in response.json()
-    assert "probabilities" in response.json()
+    assert "powered by" in response.text
+
+def test_predict():
+    response = client.post("/predict", data={"text": "Test de prédiction"})
+    assert response.status_code == 200
+    assert "positive" in response.text or "negative" in response.text
 
 def test_feedback():
-    response = client.post("/feedback", data={"correct": 1})
+    response = client.post("/feedback", data={"correct": 0})
     assert response.status_code == 200
-    assert response.json() == {"message": "Feedback received"}
+    assert "Merci pour votre feedback" in response.text
