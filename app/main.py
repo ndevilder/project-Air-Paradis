@@ -131,7 +131,7 @@ async def predict(request: Request, text: str = Form(...)):
     """
     try:
         # Vérifier si le texte est vide ou composé uniquement d'espaces
-        if not text or not text.strip():
+        if not text or not text.strip() or text.__len__ == 0:
             return templates.TemplateResponse(
                 "error.html",
                 {
