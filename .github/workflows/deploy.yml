@@ -95,6 +95,6 @@ jobs:
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
           cd /home/${{ secrets.EC2_USER }}/app || exit 1
-          sudo docker build -t fastapi-app .
+          sudo docker build --no-cache -t fastapi-app .
           sudo docker run -d --name fastapi-app -p 80:80 fastapi-app
         EOF
