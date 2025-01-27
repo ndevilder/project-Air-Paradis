@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
-from app.main import predict_text, handle_negative_feedback, negative_feedback_times
+from app.main import app
 
 client = TestClient(app)
+
 
 def test_home():
     response = client.get("/")
@@ -17,3 +18,4 @@ def test_feedback():
     response = client.post("/feedback", data={"correct": 0})
     assert response.status_code == 200
     assert "Merci pour votre feedback" in response.text
+    

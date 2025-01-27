@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException, Form, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-import os
+from transformers import DistilBertTokenizer
+from transformers import DistilBertForSequenceClassification
 import torch
 from datetime import datetime, timedelta
 from collections import deque
