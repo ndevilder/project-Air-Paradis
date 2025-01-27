@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from transformers import DistilBertTokenizer
 from transformers import DistilBertForSequenceClassification
 import torch
+import os
 from datetime import datetime, timedelta
 from collections import deque
 import yaml
@@ -26,7 +27,8 @@ app = FastAPI()
 
 # Configurer les templates et les fichiers statiques
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+base_dir = os.path.dirname(os.path.abspath(__file__))
+templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
 # Paramètres globaux pour le feedback négatif
 NEGATIVE_FEEDBACK_LIMIT = config["negative_feedback_limit"]
