@@ -30,9 +30,17 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 base_dir = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(base_dir, "templates"))
 
-# Initialize tokenizer and model
-tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased")
+
+# Charger le modèle et le tokenizer
+model_dir = config["model_dir"]
+
+try:
+    tokenizer = DistilBertTokenizer.from_pretrained(model_dir)
+    model = DistilBertForSequenceClassification.from_pretrained(model_dir)
+    model.eval()
+    print("Modèle et tokenizer chargés avec succès.")
+except Exception as e:
+    raise RuntimeError(f"Erreur lors du chargement du modèle ou du tokenizer : {e}")
 
 # Global parameters for negative feedback
 NEGATIVE_FEEDBACK_LIMIT = config["negative_feedback_limit"]
