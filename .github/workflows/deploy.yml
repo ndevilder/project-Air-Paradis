@@ -43,24 +43,17 @@ jobs:
         chmod 700 ~/.ssh
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
         chmod 600 ~/.ssh/known_hosts
-        
-    - name: Deploy to AWS EC2
+
+    - name: Deploy to EC2
       run: |
         echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
         chmod 600 ndevilder-airParadis.pem
-        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/app"
-          # Arrêter et supprimer le conteneur existant
-          sudo docker stop fastapi-app || true
-          sudo docker rm fastapi-app || true
-          
-          # Récupérer la nouvelle image depuis Docker Hub
-          sudo docker pull dralakh/airparadis:latest
-          
-          # Démarrer un nouveau conteneur
-          sudo docker run -d --name fastapi-app -p 80:80 dralakh/airparadis:latest
-          
-          # Vérification : lister les conteneurs en cours d'exécution
-          sudo docker ps
+        ssh -o StrictHostKeyChecking=no -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        sudo docker stop fastapi-app || true
+        sudo docker rm fastapi-app || true
+        sudo docker pull dralakh/airparadis:latest
+        sudo docker run -d --name fastapi-app -p 80:80 dralakh/airparadis:latest
+        sudo docker ps
         EOF
 
     # Étape 8 : Vérifier le déploiement
