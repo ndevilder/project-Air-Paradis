@@ -25,7 +25,7 @@ jobs:
     # Étape 4 : Exécuter les tests dans le conteneur Docker
     - name: Run tests in Docker
       run: |
-        docker run --rm fastapi-app pytest --cov=. --cov-report=xml
+        docker run --rm fastapi-app pytest --cov=. --cov-report=xml --disable-warnings
       # Si les tests échouent, GitHub Actions arrêtera automatiquement le workflow.
 
     # Étape 5 : Se connecter à Docker Hub
