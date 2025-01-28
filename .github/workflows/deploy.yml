@@ -37,6 +37,9 @@ jobs:
       run: docker tag fastapi-app dralakh/airparadis:latest && docker push dralakh/airparadis:latest
 
     # Étape 7 : Déployer sur EC2
+    - name: Add host to known_hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
     - name: Deploy to AWS EC2
       run: |
         echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
