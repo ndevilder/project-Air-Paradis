@@ -19,8 +19,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le code de l'application
 COPY . /app
 
+# Reconstituer le fichier avant le démarrage de l'app
+RUN cat /app/saved_models/final_distilbert_model_parts/part_* > /app/saved_models/final_distilbert_model/model.safetensors
+
 # Exposer le port utilisé par l'application
 EXPOSE 80
 
-# Commande par défaut pour lancer l'application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Copy the entrypoint script
+COPY app/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Use the entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]
