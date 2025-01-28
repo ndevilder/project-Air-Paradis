@@ -19,7 +19,7 @@ RUN pip install pytest pytest-cov
 EXPOSE 80
 
 # Copy the entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
+COPY app/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Use the entrypoint script
