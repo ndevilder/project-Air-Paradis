@@ -39,7 +39,9 @@ jobs:
     # Étape 7 : Déployer sur EC2
     - name: Deploy to AWS EC2
       run: |
-        ssh -i "${{ secrets.EC2_KEY }}" -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
+        chmod 600 ndevilder-airParadis.pem
+        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/app"
           # Arrêter et supprimer le conteneur existant
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
@@ -57,4 +59,5 @@ jobs:
     # Étape 8 : Vérifier le déploiement
     - name: Test deployment
       run: |
-        ssh -i "${{ secrets.EC2_KEY }}" -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} curl -f http://127.0.0.1:80 || (echo "Deployment failed." && exit 1)
+        ssh -i ndevilder-airParadis.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} curl -f http://127.0.0.1:80 || (echo "Deployment failed." && exit 1)
+
