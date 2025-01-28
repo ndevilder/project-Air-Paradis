@@ -14,28 +14,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # Étape 2 : Lister les fichiers pour débogage
     - name: List project files
       run: ls -R
 
-    # Étape 2 : Installer Python et les dépendances pour les tests
+    # Étape 3 : Installer Python et les dépendances pour les tests
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.9
-    
-    # Étape 3 : Installer les dépendances
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov
-        pip install httpx
+        pip install pytest pytest-cov httpx
 
-    # Étape 4 : Ajouter PYTHONPATH pour trouver les modules
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
-    # Étape 5 : Créer un fichier config.yaml pour les tests
     - name: Create config.yaml for tests
       run: |
         echo "negative_feedback_limit: 10" > config.yaml
@@ -45,66 +42,54 @@ jobs:
         echo "cloudwatch_metric_name: NegativeFeedbackCount" >> config.yaml
         echo "cloudwatch_namespace: MyApp/Feedback" >> config.yaml
 
-    - name: Create static directory for tests
-      run: mkdir -p static
-
-    # Étape 7 : Exécuter les tests avec couverture
-    - name: Run Pytest
+    # Étape 4 : Exécuter les tests
+    - name: Run tests with pytest
       run: pytest --cov=. --cov-report=xml
 
-    # Étape 4 : Vérifier si les tests ont réussi avant de continuer
-    - name: Verify Tests
-      if: failure()
+    # Étape 5 : Installation propre de Docker et containerd
+    - name: Clean and install Docker
       run: |
-        echo "Tests failed. Stopping the workflow."
-        exit 1  
-
-    # Étape 5 : Installer Docker
-    - name: Install Docker
-      run: |
+        sudo apt-get remove --purge -y containerd containerd.io || true
+        sudo apt-get autoremove -y
+        sudo apt-get autoclean
         sudo apt-get update
-        sudo apt-get install -y docker.io
+        sudo apt-get install -y ca-certificates curl gnupg
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-    # Étape 6 : Construire l'image Docker
-    - name: Build Docker Image
+    - name: Start Docker service
       run: |
-        docker build -t my-docker-repo/fastapi-app:latest .
+        sudo systemctl start docker
+        sudo systemctl enable docker
+        docker --version
+        systemctl status containerd
 
-    # Étape 7 : Se connecter à Docker Hub
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-    # Étape 8 : Pousser l'image Docker sur le registre
-    - name: Push Docker Image
-      run: docker push dralakh/airparadis:latest
-
-    # Étape 8 : Installer le client SSH
-    - name: Install SSH Client
-      run: sudo apt-get install -y openssh-client
-
-    # Étape 9 : Créer le fichier de clé SSH
-    - name: Create SSH key file
+    # Étape 6 : Construire et pousser l'image Docker
+    - name: Build Docker image
       run: |
-        echo "${{ secrets.EC2_KEY }}" > ndevilder-airParadis.pem
-        chmod 600 ndevilder-airParadis.pem
+        sudo docker build -t fastapi-app .
+        sudo docker tag fastapi-app dralakh/airparadis:latest
 
-    # Étape 10 : Ajouter EC2 à known_hosts
-    - name: Add EC2 to known_hosts
+    - name: Push Docker Image to Docker Hub
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        docker push dralakh/airparadis:latest
 
-    # Étape 11 : Vérifier la connexion SSH
-    - name: Test SSH Connection
-      run: |
-        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
-
-    # Étape 9 : Déployer l'image Docker sur l'EC2
+    # Étape 7 : Déployer sur EC2
     - name: Deploy to EC2
       run: |
         ssh -i "${{ secrets.EC2_KEY }}" -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           sudo docker pull dralakh/airparadis:latest
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
-          sudo docker run -d --name fastapi-app -p 80:80 my-docker-repo/fastapi-app:latest
+          sudo docker run -d --name fastapi-app -p 80:80 dralakh/airparadis:latest
+          echo "Docker container deployed successfully."
         EOF
+
+    # Étape 8 : Vérification du déploiement
+    - name: Test deployment
+      run: |
+        ssh -i "${{ secrets.EC2_KEY }}" -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} curl -f http://127.0.0.1:80 || (echo "Deployment failed." && exit 1)
