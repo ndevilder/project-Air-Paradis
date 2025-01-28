@@ -14,6 +14,11 @@ RUN pip install -r requirements.txt
 
 # Install test dependencies
 RUN pip install pytest pytest-cov
+RUN pip install safetensors
+
+# Copier et exécuter le script de reconstruction du modèle
+COPY app/rebuild_model.py /app/rebuild_model.py
+RUN python /app/rebuild_model.py
 
 # Expose the port the app runs on
 EXPOSE 80

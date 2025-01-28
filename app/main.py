@@ -25,6 +25,9 @@ except Exception as e:
 # Initialize FastAPI
 app = FastAPI()
 
+# Reconstruire le modèle si nécessaire
+os.system("python rebuild_model.py")
+
 # Configure templates and static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 base_dir = os.path.dirname(os.path.abspath(__file__))
