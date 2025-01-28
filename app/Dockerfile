@@ -1,20 +1,26 @@
-# Utiliser une image Python légère
+# Utiliser une image de base légère
 FROM python:3.9-slim
 
-# Installer les dépendances système
-RUN apt-get update && apt-get install -y git
+# Installer les dépendances système nécessaires
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier tous les fichiers du projet dans le conteneur
-COPY . /app
+# Copier uniquement les fichiers nécessaires pour l'installation
+COPY requirements.txt /app/
 
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exposer le port 80 pour l'application
+# Copier le code de l'application
+COPY . /app
+
+# Exposer le port utilisé par l'application
 EXPOSE 80
 
-# Lancer l'application avec Uvicorn
+# Commande par défaut pour lancer l'application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]

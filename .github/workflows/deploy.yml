@@ -17,12 +17,12 @@ jobs:
     - name: List project files
       run: ls -R
 
-    # Étape 2 : Installer Python
+    # Étape 2 : Installer Python et les dépendances pour les tests
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.9
-
+    
     # Étape 3 : Installer les dépendances
     - name: Install dependencies
       run: |
@@ -48,14 +48,35 @@ jobs:
     - name: Create static directory for tests
       run: mkdir -p static
 
-
-    # Étape 6 : Vérifier les packages installés
-    - name: Check installed packages
-      run: pip list
-
     # Étape 7 : Exécuter les tests avec couverture
     - name: Run Pytest
       run: pytest --cov=. --cov-report=xml
+
+    # Étape 4 : Vérifier si les tests ont réussi avant de continuer
+    - name: Verify Tests
+      if: failure()
+      run: |
+        echo "Tests failed. Stopping the workflow."
+        exit 1  
+
+    # Étape 5 : Installer Docker
+    - name: Install Docker
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+
+    # Étape 6 : Construire l'image Docker
+    - name: Build Docker Image
+      run: |
+        docker build -t my-docker-repo/fastapi-app:latest .
+
+    # Étape 7 : Se connecter à Docker Hub
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    # Étape 8 : Pousser l'image Docker sur le registre
+    - name: Push Docker Image
+      run: docker push dralakh/airparadis:latest
 
     # Étape 8 : Installer le client SSH
     - name: Install SSH Client
@@ -78,23 +99,12 @@ jobs:
       run: |
         ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
 
-    # Étape 12 : Créer le répertoire de l'application sur EC2
-    - name: Create App Directory on EC2
+    # Étape 9 : Déployer l'image Docker sur l'EC2
+    - name: Deploy to EC2
       run: |
-        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/${{ secrets.EC2_USER }}/app"
-
-    # Étape 13 : Transférer les fichiers vers EC2
-    - name: Transfer Files to EC2
-      run: |
-        scp -i ndevilder-airParadis.pem -r ./* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app
-
-    # Étape 14 : Déployer l'application sur EC2
-    - name: Deploy Application on EC2
-      run: |
-        ssh -i ndevilder-airParadis.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -i "${{ secrets.EC2_KEY }}" -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          sudo docker pull dralakh/airparadis:latest
           sudo docker stop fastapi-app || true
           sudo docker rm fastapi-app || true
-          cd /home/${{ secrets.EC2_USER }}/app || exit 1
-          sudo docker build --no-cache -t fastapi-app .
-          sudo docker run -d --name fastapi-app -p 80:80 fastapi-app
+          sudo docker run -d --name fastapi-app -p 80:80 my-docker-repo/fastapi-app:latest
         EOF
