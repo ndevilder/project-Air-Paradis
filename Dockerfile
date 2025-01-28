@@ -16,9 +16,8 @@ RUN pip install -r requirements.txt
 RUN pip install pytest pytest-cov
 RUN pip install safetensors
 
-# Copier et exécuter le script de reconstruction du modèle
-COPY app/rebuild_model.py /app/rebuild_model.py
-RUN python /app/rebuild_model.py
+# Reconstituer le fichier avant le démarrage de l'app
+RUN cat /app/saved_models/final_distilbert_model_parts/part_* > /app/saved_models/final_distilbert_model/model.safetensors
 
 # Expose the port the app runs on
 EXPOSE 80
