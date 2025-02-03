@@ -59,5 +59,6 @@ jobs:
     # Étape 8 : Vérifier le déploiement
     - name: Test deployment
       run: |
-        ssh -i ndevilder-airParadis.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} curl -f http://127.0.0.1:80 || (echo "Deployment failed." && exit 1)
+        ssh -i ndevilder-airParadis.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "curl -f http://127.0.0.1:80 || (echo 'Deployment failed.' && exit 1)"
+
 
