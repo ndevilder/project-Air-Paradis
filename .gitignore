@@ -1,4 +1,3 @@
-notebooks/
 artifacts/
 data/
 models/
@@ -13,7 +12,7 @@ results/
 results_roberta/
 tokenizer/
 tokenizer_roberta/
-*.ipynb
 0.26.0
 README.md
-
+backup/
+saved_vocab/
